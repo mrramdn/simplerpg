@@ -1,17 +1,17 @@
-// heroes.h
+// heroes.h (header) untuk inisialisasi
 #ifndef HEROES_H
 #define HEROES_H
 
 #include <stdbool.h>
 
-// Struktur untuk skill
+// Struktur untuk data skill
 typedef struct {
     char name[50];
     int damage;
     char description[100];
 } Skill;
 
-// Struktur untuk hero
+// Struktur untuk data hero
 typedef struct {
     char name[50];
     char role[20];

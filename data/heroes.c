@@ -1,7 +1,7 @@
 // data/heroes.c
 #include <stdio.h>
 #include <string.h>
-#include "heroes.h"
+#include "heroes.h" //untuk manggil header tadi
 
 // Inisialisasi hero
 void init_heroes(Hero heroes[]) {
