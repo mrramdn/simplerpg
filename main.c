@@ -1,129 +1,59 @@
 #include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
+#include <stdlib.h>
+#include <time.h>
+#include "heroes.h"
+#include "mechanics.c"
 
-// Simple character structure
-typedef struct {
-    char name[50];
-    int hp;
-    int attack;
-    int defense;
-    char skill_name[50];
-    bool skill_used;
-} Character;
 
-// Battle actions
-typedef enum {
-    ATTACK = 1,
-    DEFEND,
-    USE_SKILL
-} Action;
-
-// Initialize characters
-void init_characters(Character *player, Character *enemy) {
-    // Initialize player (Warrior)
-    strcpy(player->name, "Warrior");
-    player->hp = 100;
-    player->attack = 15;
-    player->defense = 10;
-    strcpy(player->skill_name, "Power Strike");
-    player->skill_used = false;
-    
-    // Initialize enemy (Dragon)
-    strcpy(enemy->name, "Dragon");
-    enemy->hp = 120;
-    enemy->attack = 20;
-    enemy->defense = 8;
-    strcpy(enemy->skill_name, "Fire Breath");
-    enemy->skill_used = false;
-}
-
-// Calculate damage
-int calculate_damage(int attack, int defense) {
-    int damage = attack - defense;
-    return damage > 0 ? damage : 1;
-}
-
-// Execute skill
-void use_skill(Character *attacker, Character *defender) {
-    if (attacker->skill_used) {
-        printf("Skill already used!\n");
-        return;
-    }
-    
-    printf("%s uses %s!\n", attacker->name, attacker->skill_name);
-    int skill_damage = attacker->attack * 2;
-    defender->hp -= skill_damage;
-    printf("Deals %d damage!\n", skill_damage);
-    attacker->skill_used = true;
-}
-
-// Display battle status
-void show_status(Character *player, Character *enemy) {
-    printf("\n%s HP: %d | %s HP: %d\n", 
-           player->name, player->hp,
-           enemy->name, enemy->hp);
-}
-
-// Main battle system
-void battle(Character *player, Character *enemy) {
-    printf("\nBattle Start: %s vs %s!\n", player->name, enemy->name);
-    
-    while (player->hp > 0 && enemy->hp > 0) {
-        show_status(player, enemy);
+// Fungsi untuk menjalankan pemilihan hero
+int choose_hero(Hero heroes[]) {
+    int choice;
+    while (1) {
+        clear_screen();
+        printf("\n===== CHOOSE YOUR HERO =====\n\n");
         
-        // Player turn
-        printf("\nYour turn!\n");
-        printf("1. Attack\n2. Defend\n3. Use Skill\n");
-        printf("Choose action (1-3): ");
+        for (int i = 0; i < 4; i++) {
+            printf("%d. %s (%s)\n", i + 1, heroes[i].name, heroes[i].role);
+            display_hero_info(&heroes[i]);
+            printf("\n");
+        }
         
-        int choice;
+        printf("\nSelect your hero (1-4): ");
         scanf("%d", &choice);
         
-        switch (choice) {
-            case ATTACK: {
-                int damage = calculate_damage(player->attack, enemy->defense);
-                enemy->hp -= damage;
-                printf("You deal %d damage!\n", damage);
-                break;
-            }
-            case DEFEND:
-                player->defense += 5;
-                printf("Defense increased!\n");
-                break;
-            case USE_SKILL:
-                use_skill(player, enemy);
-                break;
-            default:
-                printf("Invalid choice! Turn skipped.\n");
-                break;
+        if (choice >= 1 && choice <= 4) {
+            return choice - 1;
         }
-        
-        if (enemy->hp <= 0) {
-            printf("\n%s wins!\n", player->name);
-            break;
-        }
-        
-        // Enemy turn
-        printf("\nEnemy turn!\n");
-        if (!enemy->skill_used && enemy->hp < 50) {
-            use_skill(enemy, player);
-        } else {
-            int damage = calculate_damage(enemy->attack, player->defense);
-            player->hp -= damage;
-            printf("%s attacks for %d damage!\n", enemy->name, damage);
-        }
-        
-        if (player->hp <= 0) {
-            printf("\n%s wins!\n", enemy->name);
-            break;
-        }
+        printf("\nInvalid choice! Please try again.\n");
     }
 }
 
+// Fungsi utama
 int main() {
-    Character player, enemy;
-    init_characters(&player, &enemy);
-    battle(&player, &enemy);
+    srand(time(NULL));
+    Hero heroes[4];
+    init_heroes(heroes);
+    
+    // Pilih hero
+    int player_choice = choose_hero(heroes);
+    
+    // Pilih enemy random selain hero player
+    int enemy_choice;
+    do {
+        enemy_choice = rand() % 4;
+    } while (enemy_choice == player_choice);
+    
+    clear_screen();
+    printf("\nYour Hero:\n");
+    display_hero_info(&heroes[player_choice]);
+    printf("\nEnemy Hero:\n");
+    display_hero_info(&heroes[enemy_choice]);
+    
+    printf("\nPress Enter to start battle...");
+    getchar();
+    getchar();
+    
+    battle(&heroes[player_choice], &heroes[enemy_choice]);
+    
     return 0;
 }
